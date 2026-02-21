@@ -33,21 +33,34 @@ const FRONTEND_URL = (
   process.env.FRONTEND_URL || "http://localhost:5173"
 ).replace(/\/+$/, "");
 
+/** Allowed CORS origins — includes common Vite dev ports */
+const ALLOWED_ORIGINS = [
+  process.env.FRONTEND_URL || "http://localhost:5173",
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:5175",
+];
+
 // ── Express app ──────────────────────────────────────────────────────────────
 const app = express();
 
 // Required for secure cookies behind Vercel's reverse proxy
 app.set("trust proxy", 1);
 
-// CORS — lock origin to the frontend URL for credential-based requests
-app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+// CORS — allow configured frontend + common Vite dev ports
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (curl, Postman, same-origin)
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS: origin ${origin} not allowed`));
+    }
+  },
   credentials: true,
-}));
-app.options("*", cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:5173",
-  credentials: true,
-}));
+};
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 app.use(express.json());
 
 // ── Session middleware (stored in MongoDB) ────────────────────────────────────
