@@ -24,7 +24,7 @@ connectDB().catch((err) => console.error("[server] MongoDB boot error:", err));
 
 // ── New: session & auth packages ─────────────────────────────────────────────
 const session = require("express-session");
-const MongoStore = require("connect-mongo");
+const { MongoStore } = require("connect-mongo");
 const { authenticate, authorize } = require("./middleware/authMiddleware");
 
 // ── Configuration ────────────────────────────────────────────────────────────
@@ -298,7 +298,7 @@ app.use("/api/admin", authenticate, authorize("owner"), require("./routes/admin"
  * In a production app this data would live in the database;
  * for now it's hard-coded so the frontend renders instantly.
  */
-app.get("/api/form-data", authenticate, (_req, res) => {
+app.get("/api/form-data", (_req, res) => {
   res.json({
     artists: [
       { id: "a1", name: "Priya Sharma" },
