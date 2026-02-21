@@ -39,15 +39,8 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/payment-status" element={<PaymentStatus />} />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
-          {/* ── Booking: receptionist + manager + owner ── */}
-          <Route
-            path="/booking"
-            element={
-              <ProtectedRoute allowedRoles={["receptionist", "manager", "owner"]}>
-                <BookingPage />
-              </ProtectedRoute>
-            }
-          />
+          {/* ── Booking: public ── */}
+          <Route path="/booking" element={<BookingPage />} />
 
           {/* ── Manager dashboard + sub-routes ── */}
           <Route

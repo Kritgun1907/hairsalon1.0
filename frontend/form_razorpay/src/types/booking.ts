@@ -65,7 +65,6 @@ export interface BookingFormData {
   startTime: string;
   endTime: string;
   artist: string;
-  serviceType: string[];
   filledBy: string;
   searchService: string[];
   discount: string;
@@ -81,5 +80,4 @@ export interface BookingFormErrors {
   startTime?: string;
   endTime?: string;
   artist?: string;
-  serviceType?: string;
 }

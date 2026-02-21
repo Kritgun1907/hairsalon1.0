@@ -120,14 +120,33 @@ export default function BookingPage() {
               </Field>
 
               <Field label="Age" error={errors.age}>
-                <Input
-                  id="age" name="age" type="number"
-                  placeholder="e.g. 28"
-                  value={formData.age}
-                  onChange={handleChange}
-                  min="1" max="120"
-                  className={cn(errors.age && "border-red-400 focus-visible:ring-red-300")}
-                />
+                <Select value={formData.age} onValueChange={handleSelect("age")}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select age range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1-5">1 – 5</SelectItem>
+                    <SelectItem value="6-10">6 – 10</SelectItem>
+                    <SelectItem value="11-15">11 – 15</SelectItem>
+                    <SelectItem value="16-20">16 – 20</SelectItem>
+                    <SelectItem value="21-25">21 – 25</SelectItem>
+                    <SelectItem value="26-30">26 – 30</SelectItem>
+                    <SelectItem value="31-35">31 – 35</SelectItem>
+                    <SelectItem value="36-40">36 – 40</SelectItem>
+                    <SelectItem value="41-45">41 – 45</SelectItem>
+                    <SelectItem value="46-50">46 – 50</SelectItem>
+                    <SelectItem value="51-55">51 – 55</SelectItem>
+                    <SelectItem value="56-60">56 – 60</SelectItem>
+                    <SelectItem value="61-65">61 – 65</SelectItem>
+                    <SelectItem value="66-70">66 – 70</SelectItem>
+                    <SelectItem value="71-75">71 – 75</SelectItem>
+                    <SelectItem value="76-80">76 – 80</SelectItem>
+                    <SelectItem value="81-85">81 – 85</SelectItem>
+                    <SelectItem value="86-90">86 – 90</SelectItem>
+                    <SelectItem value="91-95">91 – 95</SelectItem>
+                    <SelectItem value="96+">96+</SelectItem>
+                  </SelectContent>
+                </Select>
               </Field>
 
               <Field label="Gender">
@@ -202,23 +221,13 @@ export default function BookingPage() {
                 </div>
               </Field>
 
-              <Field label="Service Type">
-                <MultiSelect
-                  items={dropdownData.serviceTypes}
-                  values={formData.serviceType}
-                  onValuesChange={handleMultiSelect("serviceType")}
-                  placeholder="Select service types…"
-                  searchPlaceholder="Search service types…"
-                />
-              </Field>
-
-              <Field label="Search Services">
+              <Field label="Services" required error={errors.amount} className="sm:col-span-2">
                 <MultiSelect
                   items={serviceDisplayItems}
                   values={formData.searchService}
                   onValuesChange={handleMultiSelect("searchService")}
                   placeholder="Search & select services…"
-                  searchPlaceholder="Type to search…"
+                  searchPlaceholder="Type to search (e.g. hair, beard, skin)…"
                 />
               </Field>
 
@@ -429,15 +438,17 @@ function Field({
   label,
   required,
   error,
+  className,
   children,
 }: {
   label: string;
   required?: boolean;
   error?: string;
+  className?: string;
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-1.5">
+    <div className={cn("space-y-1.5", className)}>
       <Label className="text-xs font-semibold tracking-wide uppercase text-stone-500">
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}

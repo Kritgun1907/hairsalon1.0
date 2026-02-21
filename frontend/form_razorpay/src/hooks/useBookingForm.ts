@@ -32,7 +32,6 @@ const EMPTY_FORM: BookingFormData = {
   startTime: "",
   endTime: "",
   artist: "",
-  serviceType: [],
   filledBy: "",
   searchService: [],
   discount: "",
@@ -107,13 +106,6 @@ export function useBookingForm() {
       e.phone = "Valid 10-digit Indian mobile number";
     if (subtotal <= 0) e.amount = "Select at least one service";
     else if (payable <= 0) e.amount = "Payable amount must be greater than ₹0";
-    if (
-      formData.age &&
-      (isNaN(Number(formData.age)) ||
-        Number(formData.age) < 1 ||
-        Number(formData.age) > 120)
-    )
-      e.age = "Enter a valid age (1–120)";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
