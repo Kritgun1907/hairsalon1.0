@@ -22,6 +22,11 @@ const Razorpay = require("razorpay");
 const connectDB = require("./db");
 connectDB().catch((err) => console.error("[server] MongoDB boot error:", err));
 
+// ── New: session & auth packages ─────────────────────────────────────────────
+const session = require("express-session");
+const MongoStore = require("connect-mongo");
+const { authenticate, authorize } = require("./middleware/authMiddleware");
+
 // ── Configuration ────────────────────────────────────────────────────────────
 /** Frontend URL used for Razorpay payment-link callbacks (redirect after pay). */
 const FRONTEND_URL = (
@@ -31,10 +36,36 @@ const FRONTEND_URL = (
 // ── Express app ──────────────────────────────────────────────────────────────
 const app = express();
 
-// Allow all origins — acceptable for an internal salon management tool
-app.use(cors({ origin: true, credentials: true }));
-app.options("*", cors({ origin: true, credentials: true }));
+// Required for secure cookies behind Vercel's reverse proxy
+app.set("trust proxy", 1);
+
+// CORS — lock origin to the frontend URL for credential-based requests
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  credentials: true,
+}));
+app.options("*", cors({
+  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  credentials: true,
+}));
 app.use(express.json());
+
+// ── Session middleware (stored in MongoDB) ────────────────────────────────────
+app.use(session({
+  secret: process.env.SESSION_SECRET || "dev-secret-change-in-prod",
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI,
+    touchAfter: 24 * 3600, // only update session once per day unless data changes
+  }),
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    maxAge: 8 * 60 * 60 * 1000, // 8 hours
+  },
+}));
 
 // ── Razorpay client (lazy — only created when credentials are provided) ─────
 const razorpay = process.env.RAZORPAY_KEY_ID
@@ -253,6 +284,10 @@ app.get("/api/verify-payment", async (req, res) => {
   }
 });
 
+// ─── Auth & Admin Routes ─────────────────────────────────────────────────────
+app.use("/api/auth", require("./routes/auth"));
+app.use("/api/admin", authenticate, authorize("owner"), require("./routes/admin"));
+
 // ─── Static Data ─────────────────────────────────────────────────────────────
 
 /**
@@ -263,7 +298,7 @@ app.get("/api/verify-payment", async (req, res) => {
  * In a production app this data would live in the database;
  * for now it's hard-coded so the frontend renders instantly.
  */
-app.get("/api/form-data", (_req, res) => {
+app.get("/api/form-data", authenticate, (_req, res) => {
   res.json({
     artists: [
       { id: "a1", name: "Priya Sharma" },
@@ -336,7 +371,7 @@ app.get("/api/health", async (_req, res) => {
 });
 
 // ─── Analytics Routes (mounted sub-router) ──────────────────────────────────
-app.use("/api/analytics", require("./routes/analytics"));
+app.use("/api/analytics", authenticate, authorize("manager", "owner"), require("./routes/analytics"));
 
 // ─── Server / Vercel Export ──────────────────────────────────────────────────
 // When run locally (`node index.js`), start an HTTP server.

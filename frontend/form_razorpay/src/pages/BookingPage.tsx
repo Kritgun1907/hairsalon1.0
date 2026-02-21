@@ -52,6 +52,7 @@ export default function BookingPage() {
 
   return (
     <AppLayout subtitle="Appointment & Payment Form">
+      <div className="mx-auto max-w-4xl w-full px-6 pt-12 pb-16">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -387,6 +388,7 @@ export default function BookingPage() {
           </p>
         </form>
       </motion.div>
+      </div>
     </AppLayout>
   );
 }

@@ -14,7 +14,7 @@ const BASE = import.meta.env.VITE_BACKEND_URL as string;
 
 /** Fetch dropdown options for the booking form. */
 export async function fetchFormData(): Promise<ApiFormData> {
-  const res = await fetch(`${BASE}/api/form-data`);
+  const res = await fetch(`${BASE}/api/form-data`, { credentials: "include" });
   if (!res.ok) throw new Error("Failed to load form data");
   return res.json();
 }
@@ -38,6 +38,7 @@ export async function createOrder(
 ): Promise<CreateOrderResult> {
   const res = await fetch(`${BASE}/api/create-order`, {
     method: "POST",
+    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
@@ -69,6 +70,7 @@ export async function verifyOrderPayment(
 ): Promise<VerifyOrderResult> {
   const res = await fetch(`${BASE}/api/verify-order-payment`, {
     method: "POST",
+    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });

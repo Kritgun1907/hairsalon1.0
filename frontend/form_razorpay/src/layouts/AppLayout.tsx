@@ -106,7 +106,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       {/* Spacer so content doesn't hide behind fixed navbar */}
       <div className="h-18" />
 
-      <main className="mx-auto max-w-4xl w-full px-6 pt-12 pb-16">{children}</main>
+      <main className="w-full">{children}</main>
 
       {/* Gradient keyframe — injected once via a style tag */}
       <style>{`

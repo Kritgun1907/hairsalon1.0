@@ -6,11 +6,12 @@
  * and visual feedback. No routing logic lives here.
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Mail, Lock, Scissors, ArrowRight, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
 // ── Tiny reusable field wrapper ────────────────────────────────────────────────
 function FormField({
@@ -103,6 +104,7 @@ function FormField({
 // ── Main component ─────────────────────────────────────────────────────────────
 export default function SignInForm() {
   const navigate = useNavigate();
+  const { user, login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -110,6 +112,14 @@ export default function SignInForm() {
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState("");
+
+  // If already logged in, redirect based on role
+  useEffect(() => {
+    if (!user) return;
+    if (user.role === "receptionist") navigate("/booking");
+    else if (user.role === "manager") navigate("/dashboard/manager");
+    else if (user.role === "owner") navigate("/dashboard/owner");
+  }, [user, navigate]);
 
   // Simple client-side validation
   const validate = () => {
@@ -128,12 +138,17 @@ export default function SignInForm() {
     if (!validate()) return;
 
     setLoading(true);
-    // Simulate auth delay — replace with real auth call
-    await new Promise((r) => setTimeout(r, 1200));
+    const result = await login(email, password);
     setLoading(false);
 
-    // For now navigate to analytics (the "signed in" destination)
-    navigate("/analytics");
+    if (!result.success) {
+      setSubmitError(result.error || "Sign in failed. Please try again.");
+      return;
+    }
+
+    if (result.role === "receptionist") navigate("/booking");
+    else if (result.role === "manager") navigate("/dashboard/manager");
+    else if (result.role === "owner") navigate("/dashboard/owner");
   };
 
   return (
